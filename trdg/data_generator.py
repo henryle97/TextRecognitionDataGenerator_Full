@@ -71,7 +71,7 @@ class FakeTextDataGenerator(object):
             text_color_hex = "rgb(" + ",".join(str(item) for item in text_color_rgb) + ")"
             text_color = color_convert.rgb2hex(text_color_hex)
             # print(text_color)
-            print(text)
+            # print(text)
         else:
             ### Simple random background ###
             ##########################
@@ -127,7 +127,7 @@ class FakeTextDataGenerator(object):
             else:
                 text = text.upper()
 
-            print(text)
+            # print(text)
 
         if rnd.random() < 0.3:
             fit = False

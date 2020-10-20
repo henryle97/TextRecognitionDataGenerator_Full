@@ -111,7 +111,7 @@ class FontColor(object):
             # fg_color = col2, bg_col = col1
             fg_col = col2
             diff = rgb_color_diff_in_gray(fg_col, true_bg_col)
-            print(diff)
+            # print(diff)
             if diff < self.gray_diff_threshold:
                 bg_col = col1
                 r, g, b = bg_col
@@ -130,7 +130,7 @@ class FontColor(object):
             # need to swap to make the second color close to the input backgroun color
             fg_col = col1
             diff = rgb_color_diff_in_gray(fg_col, true_bg_col)
-            print(diff)
+            # print(diff)
             if diff < self.gray_diff_threshold:
                 bg_col = col2
                 r, g, b = bg_col
@@ -355,7 +355,7 @@ class Colorize(object):
         """
         bg_col, fg_col, i = 0, 0, 0
         fg_col, bg_col = self.font_color.sample_from_data(bg_arr)
-        print('fg_col:  ', fg_col, ' bg_col:', bg_col)
+        # print('fg_col:  ', fg_col, ' bg_col:', bg_col)
         return Layer(alpha=text_arr, color=fg_col), fg_col, bg_col
 
     def process(self, text_arr, bg_arr, min_h):
@@ -368,7 +368,7 @@ class Colorize(object):
         """
         # decide on a color for the text:
         l_text, fg_col, bg_col = self.color_text(text_arr, min_h, bg_arr)
-        print()
+        # print()
         bg_col = np.mean(np.mean(bg_arr, axis=0), axis=0)
         l_bg = Layer(alpha=255 * np.ones_like(text_arr, 'uint8'), color=bg_col)
 
