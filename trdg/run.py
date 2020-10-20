@@ -171,7 +171,7 @@ def parse_arguments():
         "--background",
         type=int,
         nargs="?",
-        help="Define what kind of background to use. 0: Gaussian Noise, 1: Plain white, 2: Quasicrystal, 3: Image",
+        help="Define what kind of background to use. 0: Simple random , 1: Image background",
         default=0,
     )
     parser.add_argument(
@@ -342,8 +342,9 @@ def main():
         fonts = [
             os.path.join(args.font_dir, p)
             for p in os.listdir(args.font_dir)
-            if os.path.splitext(p)[1] == ".ttf"
+            if os.path.splitext(p.lower())[1] == ".ttf"
         ]
+        print("Number of fonts: ", len(fonts))
     elif args.font:
         if os.path.isfile(args.font):
             fonts = [args.font]
@@ -395,7 +396,7 @@ def main():
         strings = [x.lower() for x in strings]
 
     string_count = len(strings)
-
+    print(args)
     p = Pool(args.thread_count)
     for _ in tqdm(
         p.imap_unordered(

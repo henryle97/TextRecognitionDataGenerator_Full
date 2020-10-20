@@ -28,6 +28,11 @@ def plain_white(height, width):
 
     return Image.new("L", (width, height), 255).convert("RGBA")
 
+def plain_black(height, width):
+    return Image.new("L", (width, height), 0).convert("RGBA")
+
+def plan_gray(height, width):
+    return Image.new("L", (width, height), 150).convert("RGBA")
 
 def quasicrystal(height, width):
     """
@@ -87,3 +92,41 @@ def image(height, width, image_dir):
         return pic.crop((x, y, x + width, y + height))
     else:
         raise Exception("No images where found in the images folder!")
+
+
+def get_random_image(image_dir):
+    images = os.listdir(image_dir)
+
+    if len(images) > 0:
+        pic = Image.open(
+            os.path.join(image_dir, images[rnd.randint(0, len(images) - 1)])
+        )
+
+        return pic
+    else:
+        raise Exception("No images where found in the images folder!")
+
+def image_ver2(height, width, pic):
+    """
+        Create a background with a image
+    """
+
+    if pic.size[0] < width:
+        pic = pic.resize(
+            [width, int(pic.size[1] * (width / pic.size[0]))], Image.ANTIALIAS
+        )
+    if pic.size[1] < height:
+        pic = pic.resize(
+            [int(pic.size[0] * (height / pic.size[1])), height], Image.ANTIALIAS
+        )
+
+    if pic.size[0] == width:
+        x = 0
+    else:
+        x = rnd.randint(0, pic.size[0] - width)
+    if pic.size[1] == height:
+        y = 0
+    else:
+        y = rnd.randint(0, pic.size[1] - height)
+
+    return pic.crop((x, y, x + width, y + height))
