@@ -102,6 +102,7 @@ def get_random_image(image_dir):
             os.path.join(image_dir, images[rnd.randint(0, len(images) - 1)])
         )
 
+
         return pic
     else:
         raise Exception("No images where found in the images folder!")

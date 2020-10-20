@@ -65,8 +65,10 @@ class FakeTextDataGenerator(object):
             bg_max_height = 50
             bg_max_width = 260
             background_image = background_generator.image(bg_max_height, bg_max_width, image_dir)
-            text_color_rgb, bg_col = FontColor("font_utils/colors_new.cp").sample_from_data(background_image)
-
+            try:
+                text_color_rgb, bg_col = FontColor("font_utils/colors_new.cp").sample_from_data(background_image)
+            except:
+                return
             # print(",".join(text_color_rgb))
             text_color_hex = "rgb(" + ",".join(str(item) for item in text_color_rgb) + ")"
             text_color = color_convert.rgb2hex(text_color_hex)
