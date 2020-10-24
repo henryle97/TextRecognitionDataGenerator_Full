@@ -317,8 +317,8 @@ class FakeTextDataGenerator(object):
             mask_name = "{}_mask.png".format(str(index))
         elif name_format == 3:
             uuid_rand = uuid.uuid4()
-            image_name = "{}_{}_{}.{}".format(str(uuid_rand), text, str(uuid_rand), extension)
-            mask_name = "{}_{}_{}_mask.png".format(str(uuid_rand), text, str(uuid_rand), extension)
+            image_name = "{}_{}_{}.{}".format(str(uuid_rand), text.replace('/', '#'), str(uuid_rand), extension)
+            mask_name = "{}_{}_{}_mask.png".format(str(uuid_rand), text.replace('/', '#'), str(uuid_rand), extension)
         else:
             print("{} is not a valid name format. Using default.".format(name_format))
             image_name = "{}_{}.{}".format(text, str(index), extension)
