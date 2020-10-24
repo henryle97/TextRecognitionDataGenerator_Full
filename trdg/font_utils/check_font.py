@@ -5,7 +5,7 @@ from PIL import ImageFont, Image, ImageDraw, ImageColor
 import random as rnd
 
 font_dir = "../fonts/vn"
-text = "BỐC"
+text = "bốngBỐNG"
 print(text)
 
 def check(font_size=32, space_width = 1.0, character_spacing=0, text_color= "#000000", word_split=False):
@@ -35,7 +35,7 @@ def check(font_size=32, space_width = 1.0, character_spacing=0, text_color= "#00
 
         text_height = max([image_font.getsize(p)[1] for p in splitted_text])
         print(font, text_height)
-        txt_img = Image.new("RGBA", (text_width, text_height+20), (0, 0, 0, 0))
+        txt_img = Image.new("RGBA", (text_width, text_height), (0, 0, 0, 0))
         txt_mask = Image.new("RGB", (text_width, text_height), (0, 0, 0))
 
         txt_img_draw = ImageDraw.Draw(txt_img)
@@ -83,13 +83,13 @@ def check(font_size=32, space_width = 1.0, character_spacing=0, text_color= "#00
             (new_width, size - vertical_margin), Image.ANTIALIAS
         )
         background_width = width if width > 0 else new_width + horizontal_margin
-        background_height = size + 64
+        background_height = size
 
         background_img = Image.new("L", (background_width, background_height), 255).convert("RGBA")
-        background_img.paste(resized_img, (margin_left, margin_top+20), resized_img)
+        background_img.paste(resized_img, (margin_left, margin_top), resized_img)
 
         final_img  = background_img.convert('RGB')
-        final_img.save("font_img_2/" + os.path.basename(font) + "img.jpg")
+        final_img.save("font_img/" + os.path.basename(font) + "img.jpg")
 
 def remove():
     error_dir = 'error'
@@ -101,5 +101,5 @@ def remove():
 
 
 if __name__ == "__main__":
-    # check()
+    #check()
     remove()

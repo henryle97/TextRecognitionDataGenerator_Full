@@ -1,1 +1,1 @@
-python run.py -c 200 --background 5 --dict dicts/word_dict_order.txt -ws --font_dir fonts/vn --output_dir 'out_all_bg' --name_format 3
+python run.py -c 200 --background 5 --dict dicts/word_dict_order.txt -ws --font_dir fonts/vn --output_dir 'out_all_bg' --name_format 3 --thread_count 8
