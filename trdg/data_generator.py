@@ -74,6 +74,11 @@ class FakeTextDataGenerator(object):
                 text_color = color_convert.rgb2hex(text_color_hex)
                 # print(text_color)
                 # print(text)
+                aug_prob = rnd.random()
+                if aug_prob < 0.1:
+                    random_skew = True
+                    skewing_angle = 10
+
             else:
                 ### Simple random background ###
                 ##########################
@@ -111,8 +116,6 @@ class FakeTextDataGenerator(object):
                 else:
                     text_color = "#FFFFFF"
                     background_type = 3
-
-
 
             ### TEXT ###
             if 'UTM' in font:
