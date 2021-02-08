@@ -58,6 +58,7 @@ class FakeTextDataGenerator(object):
         image = None
 
 
+
         try:
             ### Background Image ###
             if background_type == 5:
@@ -65,19 +66,27 @@ class FakeTextDataGenerator(object):
                 bg_max_height = 50
                 bg_max_width = 260
                 background_image = background_generator.image(bg_max_height, bg_max_width, image_dir)
-                try:
-                    text_color_rgb, bg_col = FontColor("font_utils/colors_new.cp").sample_from_data(background_image)
-                except:
-                    return
-                # print(",".join(text_color_rgb))
-                text_color_hex = "rgb(" + ",".join(str(item) for item in text_color_rgb) + ")"
-                text_color = color_convert.rgb2hex(text_color_hex)
+
+                #Choose color
+                # colors = ['#990028', '#E500AF', '#000000', '#4C4C4C']   # id
+                colors = ['#000000']  # text
+
+                # try:
+                #     text_color_rgb, bg_col = FontColor("font_utils/colors_new.cp").sample_from_data(background_image)
+                # except:
+                #     print("Error load color")
+                #     return
+                # # print(",".join(text_color_rgb))
+                # text_color_hex = "rgb(" + ",".join(str(item) for item in text_color_rgb) + ")"
+                # text_color = color_convert.rgb2hex(text_color_hex)
                 # print(text_color)
                 # print(text)
+                text_color = rnd.choice(colors)
+
                 aug_prob = rnd.random()
                 if aug_prob < 0.1:
                     random_skew = True
-                    skewing_angle = 10
+                    skewing_angle = 5
 
             else:
                 ### Simple random background ###
@@ -118,32 +127,43 @@ class FakeTextDataGenerator(object):
                     background_type = 3
 
             ### TEXT ###
-            if 'UTM' in font:
-                if rnd.random() < 0.5:
-                    text = text.lower()
-                else:
-                    text = text[0].upper() + text[1:].lower()
-            else:
-                random_int = rnd.random()
-                if random_int < 0.4:
-                    text = text.lower()
-                elif 0.4 <= random_int < 0.6:
-                    text = text[0].upper() + text[1:].lower()
-                else:
-                    text = text.upper()
+            # if 'UTM' in font:
+            #     if rnd.random() < 0.5:
+            #         text = text.lower()
+            #     else:
+            #         text = text[0].upper() + text[1:].lower()
+            # else:
+            #     random_int = rnd.random()
+            #     if random_int < 0.4:
+            #         text = text.lower()
+            #     elif 0.4 <= random_int < 0.6:
+            #         text = text[0].upper() + text[1:].lower()
+            #     else:
+            #         text = text.upper()
+
+            text = text.replace("/", "#")
+
+
 
                 # print(text)
 
-            if rnd.random() < 0.3:
+            if rnd.random() < 0.4:
                 fit = False
-                margins = (5, 5, 5, 5)
+                margins = (5, rnd.randint(5,10), 5, rnd.randint(5,10))
             else:
                 fit = True
                 margins = (6, 6, 6, 6)
 
+            # character space:
+            # character_spacing = rnd.randint(0, 4)  # id
+            character_spacing = rnd.randint(0, 1)  # text
+
+
             margin_top, margin_left, margin_bottom, margin_right = margins
             horizontal_margin = margin_left + margin_right
             vertical_margin = margin_top + margin_bottom
+
+
             ##########################
             # Create picture of text #
             ##########################
@@ -330,11 +350,13 @@ class FakeTextDataGenerator(object):
             # Save the image
             if out_dir is not None:
                 final_image.convert("RGB").save(os.path.join(out_dir, image_name))
+                # print("DONE")
                 if output_mask == 1:
                     final_mask.convert("RGB").save(os.path.join(out_dir, mask_name))
             else:
                 if output_mask == 1:
                     return final_image.convert("RGB"), final_mask.convert("RGB")
                 return final_image.convert("RGB")
-        except Exception:
+        except Exception as err:
+            print(err)
             return

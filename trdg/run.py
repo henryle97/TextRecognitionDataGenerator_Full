@@ -382,18 +382,21 @@ def main():
             args.length, args.random, args.count, lang_dict
         )
 
-    if args.language == "ar":
-        from arabic_reshaper import ArabicReshaper
+    # if args.language == "ar":
+    #     from arabic_reshaper import ArabicReshaper
+    #
+    #     arabic_reshaper = ArabicReshaper()
+    #     strings = [
+    #         " ".join([arabic_reshaper.reshape(w) for w in s.split(" ")[::-1]])
+    #         for s in strings
+    #     ]
 
-        arabic_reshaper = ArabicReshaper()
-        strings = [
-            " ".join([arabic_reshaper.reshape(w) for w in s.split(" ")[::-1]])
-            for s in strings
-        ]
-    if args.case == "upper":
-        strings = [x.upper() for x in strings]
-    if args.case == "lower":
-        strings = [x.lower() for x in strings]
+    # STRING UTILS
+    # if args.case == "upper":
+    #     strings = [x.upper() for x in strings]
+    # if args.case == "lower":
+    #     strings = [x.lower() for x in strings]
+
 
     string_count = len(strings)
     print(args)

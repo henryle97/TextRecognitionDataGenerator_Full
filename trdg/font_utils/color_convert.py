@@ -20,5 +20,5 @@ def rgb2hex(rgb_color):
     return hex_color
 
 if __name__ == "__main__":
-    hex = rgb_to_hex('rgb(1,2,3)')
+    hex = rgb2hex('rgb(1,2,3)')
     print(hex)

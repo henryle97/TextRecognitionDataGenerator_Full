@@ -1,0 +1,14 @@
+id
+name
+date
+
+
+add1: xa, huyen, tinh : line 1: xa, line 2: huyen, tinh //  1 line
+add2: street, xa, huyen, tinh : line 1: street, line 2: xa, huyen, tinh // line 1: xa, line 2: huyen tinh
+
+1.000.000
+200: add  : 10000 * 60
+50: name
+50: id
+50: date
+
