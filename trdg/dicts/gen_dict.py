@@ -168,6 +168,15 @@ def load_add_json():
         for add in address_full:
             f_w.write(add + "\n")
 
+import re
+def clean_data(file_path):
+    with open(file_path, 'r') as f:
+        lines = [line.strip() for line in f.readlines()]
+
+    with open(file_path, 'w') as f2:
+        for line in lines:
+            line = re.sub("[^]")
+            f2.write(line + "\n")
 
 
 

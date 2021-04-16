@@ -1,13 +1,13 @@
 import argparse
 import os, errno
 import sys
+import uuid
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 import random as rnd
-import string
 import sys
-
+from trdg.colorize3_poisson import FontColor
 from tqdm import tqdm
 from trdg.string_generator import (
     create_strings_from_dict,
@@ -15,8 +15,11 @@ from trdg.string_generator import (
     create_strings_from_wikipedia,
     create_strings_randomly,
 )
+
 from trdg.utils import load_dict, load_fonts
-from trdg.data_generator import FakeTextDataGenerator
+# from trdg.data_generator import FakeTextDataGenerator
+from trdg.data_generator_handwriting import FakeTextDataGenerator
+
 from multiprocessing import Pool
 
 
@@ -342,7 +345,7 @@ def main():
         fonts = [
             os.path.join(args.font_dir, p)
             for p in os.listdir(args.font_dir)
-            if os.path.splitext(p.lower())[1] == ".ttf"
+            if os.path.splitext(p.lower())[1] == ".ttf" or os.path.splitext(p.lower())[1] == ".otf"
         ]
         print("Number of fonts: ", len(fonts))
     elif args.font:
@@ -352,6 +355,7 @@ def main():
             sys.exit("Cannot open font")
     else:
         fonts = load_fonts(args.language)
+
 
     # Creating synthetic sentences (or word)
     strings = []
@@ -382,21 +386,28 @@ def main():
             args.length, args.random, args.count, lang_dict
         )
 
-    # if args.language == "ar":
-    #     from arabic_reshaper import ArabicReshaper
-    #
-    #     arabic_reshaper = ArabicReshaper()
-    #     strings = [
-    #         " ".join([arabic_reshaper.reshape(w) for w in s.split(" ")[::-1]])
-    #         for s in strings
-    #     ]
 
-    # STRING UTILS
+    ### STRING UTILS: Insensitive or sensitive case ###
     # if args.case == "upper":
     #     strings = [x.upper() for x in strings]
     # if args.case == "lower":
     #     strings = [x.lower() for x in strings]
+    # only for name
+    # strings = [x.upper() for x in strings]
 
+    ### NAME IMAGE ###
+    if args.name_format == 2:
+        prefix_name = str(uuid.uuid4())
+    else:
+        prefix_name = ""
+
+
+
+    # Handwriting model
+
+
+
+    colors_generator = FontColor("font_utils/colors_new.npy", gray_diff_threshold=70)
 
     string_count = len(strings)
     print(args)
@@ -431,6 +442,8 @@ def main():
                 [args.output_mask] * string_count,
                 [args.word_split] * string_count,
                 [args.image_dir] * string_count,
+                [prefix_name] * string_count,
+                [colors_generator] * string_count,
             ),
         ),
         total=args.count,
@@ -440,12 +453,20 @@ def main():
 
     if args.name_format == 2:
         # Create file with filename-to-label connections
+        # args.output_dir = output_dir/dir_name: "text_result/id_img"
+        # format:
+        #   dir_name/filename1.jpg label1
+        #   dir_name/filename1.jpg label1
+
+        output_dirname = os.path.basename(args.output_dir)   # id_img
+        output_parent_dir = os.path.dirname(args.output_dir)  # text_result
+
         with open(
-            os.path.join(args.output_dir, "labels.txt"), "w", encoding="utf8"
+            os.path.join(output_parent_dir, output_dirname + "_" + "labels.txt"), "w", encoding="utf8"
         ) as f:
             for i in range(string_count):
-                file_name = str(i) + "." + args.extension
-                f.write("{} {}\n".format(file_name, strings[i]))
+                file_name = output_dirname + "/" + prefix_name + "_" + str(i) + "." + args.extension
+                f.write("{}||||{}\n".format(file_name, strings[i]))
 
 
 if __name__ == "__main__":

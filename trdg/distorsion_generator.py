@@ -102,7 +102,7 @@ def sin(image, mask, vertical=False, horizontal=False):
         Apply a sine distorsion on one or both of the specified axis
     """
 
-    max_offset = int(image.height ** 0.5)
+    max_offset = int(image.height ** 0.2)
 
     return _apply_func_distorsion(
         image,

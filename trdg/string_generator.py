@@ -2,11 +2,11 @@ import random as rnd
 import re
 import string
 import requests
-
+import numpy as np
 from bs4 import BeautifulSoup
 
 
-def create_strings_from_file(filename, count):
+def create_strings_from_file(filename, count, min_):
     """
         Create all strings by reading lines in specified files
     """
@@ -22,6 +22,34 @@ def create_strings_from_file(filename, count):
                 strings.extend(lines[0 : count - len(strings)])
             else:
                 strings.extend(lines)
+
+    return strings
+
+def create_strings_from_file_v2(filename, count, min_words, max_words):
+    """
+        Create all strings by reading lines in specified files
+    """
+
+    strings = []
+
+    with open(filename, "r", encoding="utf8") as f:
+        lines = np.array([l.strip() for l in f.read().splitlines() if len(l) > 0])
+        if len(lines) == 0:
+            raise Exception("No lines could be read in file")
+
+        lines_rnd = np.random.choice(lines, 100000)
+        for line in lines_rnd:
+            words = line.split(" ")
+            len_rnd = np.random.randint(min_words, max_words)
+            words_choice = words[: len_rnd]
+            string = " ".join(words_choice)
+            strings.append(string)
+
+        # while len(strings) < count:
+        #     if len(lines) >= count - len(strings):
+        #         strings.extend(lines[0 : count - len(strings)])
+        #     else:
+        #         strings.extend(lines)
 
     return strings
 

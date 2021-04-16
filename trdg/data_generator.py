@@ -9,11 +9,12 @@ from trdg.colorize3_poisson import FontColor
 from trdg.font_utils import color_convert
 
 import numpy as np
-
-try:
-    from trdg import handwritten_text_generator
-except ImportError as e:
-    print("Missing modules for handwritten text generation.")
+from trdg import handwritten_text_generator_v2
+# try:
+#     from trdg import handwritten_text_generator_v2
+# except ImportError as e:
+#     # print("Missing modules for handwritten text generation.")
+#     pass
 
 
 class FakeTextDataGenerator(object):
@@ -54,39 +55,56 @@ class FakeTextDataGenerator(object):
         output_mask,
         word_split,
         image_dir,
+        prefix_name,
+        colors_generator,
     ):
-        image = None
 
-
-
-        try:
+        # try:
             ### Background Image ###
-            if background_type == 5:
 
-                bg_max_height = 50
-                bg_max_width = 260
+            # If complex background
+            if background_type == 1:
+
+                bg_max_height = 64
+                bg_max_width = 1500
                 background_image = background_generator.image(bg_max_height, bg_max_width, image_dir)
 
                 #Choose color
                 # colors = ['#990028', '#E500AF', '#000000', '#4C4C4C']   # id
-                colors = ['#000000']  # text
+                # colors = ['#000000']  # text
+                # text_color = rnd.choice(colors)
 
-                # try:
-                #     text_color_rgb, bg_col = FontColor("font_utils/colors_new.cp").sample_from_data(background_image)
-                # except:
-                #     print("Error load color")
-                #     return
-                # # print(",".join(text_color_rgb))
-                # text_color_hex = "rgb(" + ",".join(str(item) for item in text_color_rgb) + ")"
-                # text_color = color_convert.rgb2hex(text_color_hex)
-                # print(text_color)
-                # print(text)
-                text_color = rnd.choice(colors)
+                # Gen color for text
+                try:
+                    text_color_rgb, bg_col = colors_generator.sample_from_data(background_image)
+                except Exception as e :
+                    print("Error load color: ", e)
+                    return
+                text_color_hex = "rgb(" + ",".join(str(item) for item in text_color_rgb) + ")"
+                text_color = color_convert.rgb2hex(text_color_hex)
 
-                aug_prob = rnd.random()
-                if aug_prob < 0.1:
+                # Choose rotate aug
+
+                if rnd.random() < 0.2:   # 20% rot
                     random_skew = True
-                    skewing_angle = 5
+                    skewing_angle = 3
+                else:
+                    random_skew = False
+                    skewing_angle = 0
+
+                distor_rnd = rnd.random()
+                if distor_rnd < 0.35:
+                    distorsion_type = 3  # 0 (None), 1 (Sin), 2 (Cos), 3 (Random)
+                    distorsion_orientation = 0  # 0 (up-down),1 (left-right) ,2 (both)
+                elif 0.35 <= distor_rnd < 0.4:
+                    distorsion_type = 3  # 0 (None), 1 (Sin), 2 (Cos), 3 (Random)
+                    distorsion_orientation = 1  # 0 (up-down),1 (left-right) ,2 (both)
+                elif 0.4 <= distor_rnd < 0.45:
+                    distorsion_type = 1  # 0 (None), 1 (Sin), 2 (Cos), 3 (Random)
+                    distorsion_orientation = 2  # 0 (up-down),1 (left-right) ,2 (both)
+                else:
+                    distorsion_type = 0
+                    distorsion_orientation = 0
 
             else:
                 ### Simple random background ###
@@ -96,72 +114,82 @@ class FakeTextDataGenerator(object):
                 # 1 - white + black text, 3 - black  + white text , 4 - gray  + back/white text
                 # "#282828" - black,              # or #FFFFFF : white   or #b0aeae : gray
 
-                aug_prob = rnd.random()
-                if aug_prob < 0.1:
+
+                '''ROT'''
+                if rnd.random() < 0.2:   # 20% rot
                     random_skew = True
-                    skewing_angle = 10
-                elif 0.1 <= aug_prob < 0.2:
-                    distorsion_type = 1
+                    skewing_angle = 3
                 else:
                     random_skew = False
                     skewing_angle = 0
-                    distorsion_type = 0
 
-                if rnd.random() < 0.1:
+                '''DISTOR'''
+                distor_rnd = rnd.random()
+                if distor_rnd < 0.3:
+                    distorsion_type = 3          # 0 (None), 1 (Sin), 2 (Cos), 3 (Random)
+                    distorsion_orientation = 0   # 0 (up-down),1 (left-right) ,2 (both)
+                elif 0.3 <= distor_rnd < 0.5:
+                    distorsion_type = 3  # 0 (None), 1 (Sin), 2 (Cos), 3 (Random)
+                    distorsion_orientation = 1  # 0 (up-down),1 (left-right) ,2 (both)
+                elif 0.5 <= distor_rnd < 0.55:
+                    distorsion_type = 1  # 0 (None), 1 (Sin), 2 (Cos), 3 (Random)
+                    distorsion_orientation = 2  # 0 (up-down),1 (left-right) ,2 (both)
+                else:
+                    distorsion_type = 0
+                    distorsion_orientation = 0
+
+
+
+                '''BLUR'''
+                if rnd.random() < 0.1:   # 10% blur
                     random_blur = True
                     blur = 1
 
-                if rnd.random() < 0.5:
+                '''BACKGROUND COLOR '''
+                if rnd.random() < 0.9:                 # 50% black color text
                     text_color = "#000000"
                     bg_prob = rnd.random()
-                    if bg_prob < 0.4:
-                        background_type = 1
-                        random_blur = False
-                        blur = 0
-                    elif 0.4 <= bg_prob < 0.6:
+                    if bg_prob < 0.1:                  # 20% white bg
+                        background_type = 2
+                    elif 0.1 <= bg_prob < 0.8:         # 20 % gauss bg
                         background_type = 0
                     else:
-                        background_type = 4
-                else:
-                    text_color = "#FFFFFF"
-                    background_type = 3
+                        background_type = 5            # 40% gray
+                else:                                  #
+                    text_color = "#FFFFFF"            #
+                    background_type = 4
 
             ### TEXT ###
-            # if 'UTM' in font:
-            #     if rnd.random() < 0.5:
-            #         text = text.lower()
-            #     else:
-            #         text = text[0].upper() + text[1:].lower()
-            # else:
-            #     random_int = rnd.random()
-            #     if random_int < 0.4:
-            #         text = text.lower()
-            #     elif 0.4 <= random_int < 0.6:
-            #         text = text[0].upper() + text[1:].lower()
-            #     else:
-            #         text = text.upper()
-
-            text = text.replace("/", "#")
+            if 'UTM' in font:
+                if rnd.random() < 0.5:
+                    text = text.lower()
+                else:
+                    text = text[0].upper() + text[1:].lower()
 
 
+            ''' RANDOM PADDING / FIT '''
+            if rnd.random() < 0.5:
+                if rnd.random() < 0.8:
+                    fit = True
+                    # margins = (5, rnd.randint(0, 10), 5, rnd.randint(5, 10))
+                    margins = (rnd.randint(4, 10), rnd.randint(4, 20), rnd.randint(4, 10), rnd.randint(4, 20))   # top, left, bottom, right
+                else:  # larger
+                    margins = (rnd.randint(4, 10), rnd.randint(10, 30), rnd.randint(4, 10), rnd.randint(10, 30))   # top, left, bottom, right
 
-                # print(text)
-
-            if rnd.random() < 0.4:
-                fit = False
-                margins = (5, rnd.randint(5,10), 5, rnd.randint(5,10))
             else:
                 fit = True
-                margins = (6, 6, 6, 6)
-
-            # character space:
-            # character_spacing = rnd.randint(0, 4)  # id
-            character_spacing = rnd.randint(0, 1)  # text
-
+                margin_rand = rnd.randint(0, 5)
+                # margins = (1, 1, 1, 1)
+                margins = [margin_rand] * 4
 
             margin_top, margin_left, margin_bottom, margin_right = margins
             horizontal_margin = margin_left + margin_right
             vertical_margin = margin_top + margin_bottom
+
+            '''character space:'''
+            # character_spacing = rnd.randint(0, 4)  # id
+
+            character_spacing = rnd.randint(0, 1)  # text
 
 
             ##########################
@@ -170,7 +198,7 @@ class FakeTextDataGenerator(object):
             if is_handwritten:
                 if orientation == 1:
                     raise ValueError("Vertical handwritten text is unavailable")
-                image, mask = handwritten_text_generator.generate(text, text_color)
+                image, mask = handwritten_text_generator_v2.generate(text, text_color)
             else:
                 image, mask = computer_text_generator.generate(
                     text,
@@ -198,7 +226,7 @@ class FakeTextDataGenerator(object):
             #############################
             if distorsion_type == 0:
                 distorted_img = rotated_img  # Mind = blown
-                distorted_mask = rotated_mask
+                # distorted_mask = rotated_mask
             elif distorsion_type == 1:
                 distorted_img, distorted_mask = distorsion_generator.sin(
                     rotated_img,
@@ -224,7 +252,6 @@ class FakeTextDataGenerator(object):
             ##################################
             # Resize image to desired format #
             ##################################
-            # print('Image size: ', distorted_img.size)
             # Horizontal text
             if orientation == 0:
                 new_width = int(
@@ -234,7 +261,7 @@ class FakeTextDataGenerator(object):
                 resized_img = distorted_img.resize(
                     (new_width, size - vertical_margin), Image.ANTIALIAS
                 )
-                resized_mask = distorted_mask.resize((new_width, size - vertical_margin), Image.NEAREST)
+                # resized_mask = distorted_mask.resize((new_width, size - vertical_margin), Image.NEAREST)
                 background_width = width if width > 0 else new_width + horizontal_margin
                 background_height = size
             # Vertical text
@@ -246,9 +273,9 @@ class FakeTextDataGenerator(object):
                 resized_img = distorted_img.resize(
                     (size - horizontal_margin, new_height), Image.ANTIALIAS
                 )
-                resized_mask = distorted_mask.resize(
-                    (size - horizontal_margin, new_height), Image.NEAREST
-                )
+                # resized_mask = distorted_mask.resize(
+                #     (size - horizontal_margin, new_height), Image.NEAREST
+                # )
                 background_width = size
                 background_height = new_height + vertical_margin
             else:
@@ -261,19 +288,19 @@ class FakeTextDataGenerator(object):
                 background_img = background_generator.gaussian_noise(
                     background_height, background_width
                 )
-            elif background_type == 1:
+            elif background_type == 2:
                 background_img = background_generator.plain_white(
                     background_height, background_width
                 )
-            elif background_type == 2:
+            elif background_type == 3:
                 background_img = background_generator.quasicrystal(
                     background_height, background_width
                 )
-            elif background_type == 3:
+            elif background_type == 4:
                 background_img = background_generator.plain_black(
                     background_height, background_width
                 )
-            elif background_type == 4:
+            elif background_type == 5:
                 background_img = background_generator.plan_gray(
                     background_height, background_width
                 )
@@ -282,39 +309,41 @@ class FakeTextDataGenerator(object):
                 background_img = background_generator.image_ver2(
                     background_height, background_width, background_image
                 )
-            background_mask = Image.new(
-                "RGB", (background_width, background_height), (0, 0, 0)
-            )
+
+            # DISABLE BACKGROUND MASK
+            # background_mask = Image.new(
+            #     "RGB", (background_width, background_height), (0, 0, 0)
+            # )
 
             #############################
             # Place text with alignment #
             #############################
 
             new_text_width, _ = resized_img.size
-
+            # print("Background: {}, text: {}, margin: {}".format(background_img.size, resized_img.size, margins))
             if alignment == 0 or width == -1:
                 background_img.paste(resized_img, (margin_left, margin_top), resized_img)
-                background_mask.paste(resized_mask, (margin_left, margin_top))
+                # background_mask.paste(resized_mask, (margin_left, margin_top))
             elif alignment == 1:
                 background_img.paste(
                     resized_img,
                     (int(background_width / 2 - new_text_width / 2), margin_top),
                     resized_img,
                 )
-                background_mask.paste(
-                    resized_mask,
-                    (int(background_width / 2 - new_text_width / 2), margin_top),
-                )
+                # background_mask.paste(
+                #     resized_mask,
+                #     (int(background_width / 2 - new_text_width / 2), margin_top),
+                # )
             else:
                 background_img.paste(
                     resized_img,
                     (background_width - new_text_width - margin_right, margin_top),
                     resized_img,
                 )
-                background_mask.paste(
-                    resized_mask,
-                    (background_width - new_text_width - margin_right, margin_top),
-                )
+                # background_mask.paste(
+                #     resized_mask,
+                #     (background_width - new_text_width - margin_right, margin_top),
+                # )
 
             ##################################
             # Apply gaussian blur #
@@ -324,20 +353,21 @@ class FakeTextDataGenerator(object):
                 radius=blur if not random_blur else rnd.randint(0, blur)
             )
             final_image = background_img.filter(gaussian_filter)
-            final_mask = background_mask.filter(gaussian_filter)
+            # final_mask = background_mask.filter(gaussian_filter)
 
             #####################################
             # Generate name for resulting image #
             #####################################
-            if name_format == 0:
+            if name_format == 2:   # best
+                image_name = "{}_{}.{}".format(prefix_name, str(index), extension)
+                mask_name = "{}_mask.png".format(str(index))
+            elif name_format == 0:
                 image_name = "{}_{}.{}".format(text, str(index), extension)
                 mask_name = "{}_{}_mask.png".format(text, str(index))
             elif name_format == 1:
                 image_name = "{}_{}.{}".format(str(index), text, extension)
                 mask_name = "{}_{}_mask.png".format(str(index), text)
-            elif name_format == 2:
-                image_name = "{}.{}".format(str(index), extension)
-                mask_name = "{}_mask.png".format(str(index))
+
             elif name_format == 3:
                 uuid_rand = uuid.uuid4()
                 image_name = "{}_{}_{}.{}".format(str(uuid_rand), text.replace('/', '#'), str(uuid_rand), extension)
@@ -351,12 +381,12 @@ class FakeTextDataGenerator(object):
             if out_dir is not None:
                 final_image.convert("RGB").save(os.path.join(out_dir, image_name))
                 # print("DONE")
-                if output_mask == 1:
-                    final_mask.convert("RGB").save(os.path.join(out_dir, mask_name))
+                # if output_mask == 1:
+                #     final_mask.convert("RGB").save(os.path.join(out_dir, mask_name))
             else:
-                if output_mask == 1:
-                    return final_image.convert("RGB"), final_mask.convert("RGB")
+                # if output_mask == 1:
+                #     return final_image.convert("RGB"), final_mask.convert("RGB")
                 return final_image.convert("RGB")
-        except Exception as err:
-            print(err)
-            return
+        # except Exception as err:
+        #     print(err)
+        #     return

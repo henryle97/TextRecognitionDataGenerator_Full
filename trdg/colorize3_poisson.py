@@ -1,18 +1,10 @@
 import cv2
 import cv2 as cv
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy.interpolate as si
-import scipy.ndimage as scim
 import scipy.ndimage.interpolation as sii
-import os
 import os.path as osp
-# import cPickle as cp
-import _pickle as cp
-# import Image
 from PIL import Image
 from trdg.poisson_reconstruct import blit_images
-import pickle
 import math
 
 def rgb_color_diff_in_gray(col1, col2):
@@ -53,14 +45,10 @@ class Layer(object):
 
 class FontColor(object):
 
-    def __init__(self, col_file):
-        self.gray_diff_threshold = 120  # add threshold
+    def __init__(self, col_file, gray_diff_threshold):
+        self.gray_diff_threshold = gray_diff_threshold  # add threshold
         with open(col_file, 'rb') as f:
-            # self.colorsRGB = cp.load(f)
-            u = pickle._Unpickler(f)
-            u.encoding = 'latin1'
-            p = u.load()
-            self.colorsRGB = p
+            self.colorsRGB = np.load(f)
         self.ncol = self.colorsRGB.shape[0]
 
         # convert color-means from RGB to LAB for better nearest neighbour
@@ -91,7 +79,6 @@ class FontColor(object):
 
         norms = np.linalg.norm(self.colorsLAB - bg_mean[None, :], axis=1)
         # choose a random color amongst the top 3 closest matches:
-        # nn = np.random.choice(np.argsort(norms)[:3])
         nn = np.argmin(norms)
 
         ## nearest neighbour color:
@@ -100,17 +87,12 @@ class FontColor(object):
         col1 = self.sample_normal(data_col[:3], data_col[3:6])
         col2 = self.sample_normal(data_col[6:9], data_col[9:12])
 
-        # if nn < self.ncol:
-        #     return (col2, col1)
-        # else:
-        #     # need to swap to make the second color close to the input backgroun color
-        #     return (col1, col2)
-
         true_bg_col = np.mean(np.mean(bg_orig, axis=0), axis=0)
         if nn < self.ncol:
             # fg_color = col2, bg_col = col1
             fg_col = col2
             diff = rgb_color_diff_in_gray(fg_col, true_bg_col)
+            # print(diff)
             # print(diff)
             if diff < self.gray_diff_threshold:
                 bg_col = col1
@@ -120,10 +102,7 @@ class FontColor(object):
                     fg_col = np.array([0, 0, 0])
                 else:
                     fg_col = np.array([255, 255, 255])
-                # # fg_col = self.sample_normal(data_col[6:9], data_col[9:12])
-                # fg_col = np.array([255,255,255])
-                # print('change color: ', diff, fg_col)
-                # diff = rgb_color_diff_in_gray(fg_col, true_bg_col)
+
             col2 = fg_col
             return (col2, col1)
         else:
@@ -139,10 +118,7 @@ class FontColor(object):
                     fg_col = np.array([0, 0, 0])
                 else:
                     fg_col = np.array([255, 255, 255])
-                #
-                # fg_col = self.sample_normal(data_col[:3], data_col[3:6])
-                # print('change color: ', diff, fg_col)
-                # diff = rgb_color_diff_in_gray(fg_col, true_bg_col)
+
             col1 = fg_col
             return (col1, col2)
 
