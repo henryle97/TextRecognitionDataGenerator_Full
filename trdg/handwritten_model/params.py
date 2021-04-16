@@ -1,5 +1,4 @@
 save_path = 'logs/exp1'
-# load_path = "handwritten_model/model_ep150.pt"
 load_path = "handwritten_model/model_ep150.pt"
 
 dec_hidden_size = 400

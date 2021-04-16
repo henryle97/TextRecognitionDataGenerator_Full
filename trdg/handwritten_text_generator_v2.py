@@ -10,6 +10,7 @@ import warnings
 from  trdg.handwritten_model.handwritten import HandwritingSynthesisNetwork
 from trdg.handwritten_model import params as pr
 import os
+
 # import params as pr
 os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
 
@@ -65,7 +66,8 @@ def preprocessing_str(sent, vocab):
 def sent2idx(sent, char2idx):
     return np.asarray([char2idx[c] for c in sent])
 
-def _sample_text_v2(model, text, vocab, device, char2idx):
+def _sample_text_v2(model, text, vocab, char2idx):
+    device = model.device
     string_processed = preprocessing_str(text, vocab)
     # print("Processed: ", string_processed)
     chars = torch.from_numpy(
@@ -134,24 +136,25 @@ def align_strokes(coords):
     coords[:, :2] = np.dot(coords[:, :2], rotation_matrix) - offset
     return coords
 
-def generate(model,vocab, device, char2idx, text, text_color, align=True):
+
+def generate(model, vocab, char2idx, text, text_color=None, align=True):
 
     images = []
-    colors = [ImageColor.getrgb(c) for c in text_color.split(",")]
-    c1, c2 = colors[0], colors[-1]
-
-    color = "#{:02x}{:02x}{:02x}".format(
-        rnd.randint(min(c1[0], c2[0]), max(c1[0], c2[0])),
-        rnd.randint(min(c1[1], c2[1]), max(c1[1], c2[1])),
-        rnd.randint(min(c1[2], c2[2]), max(c1[2], c2[2])),
-    )
+    # colors = [ImageColor.getrgb(c) for c in text_color.split(",")]
+    # c1, c2 = colors[0], colors[-1]
+    #
+    # color = "#{:02x}{:02x}{:02x}".format(
+    #     rnd.randint(min(c1[0], c2[0]), max(c1[0], c2[0])),
+    #     rnd.randint(min(c1[1], c2[1]), max(c1[1], c2[1])),
+    #     rnd.randint(min(c1[2], c2[2]), max(c1[2], c2[2])),
+    # )
 
     for word in text.split(" "):
         # print("Word: ",  word)
         word += " "
 
         coords = _sample_text_v2(
-            model, word, vocab, device, char2idx
+            model, word, vocab, char2idx
         )
         # print(coords)
         # break
@@ -170,18 +173,21 @@ def generate(model,vocab, device, char2idx, text, text_color, align=True):
             strokes[:, 1:] = align_strokes(strokes[:, 1:])
 
         stroke = []
+        color_pen = rnd.choice(['blue', 'black', 'red'])
+        linewidth = rnd.choice([2,3, 4,5, 8, 12])
+        # linewidth =
         for eos, x, y in strokes:
             stroke.append((x, y))
             if eos == 1:
                 xs, ys = zip(*stroke)
                 ys = np.array(ys)
-                plt.plot(xs, ys, 'k', c='blue')
+                plt.plot(xs, ys, 'k', c=color_pen, linewidth=linewidth)
                 stroke = []
 
         if stroke:
             xs, ys = zip(*stroke)
             ys = np.array(ys)
-            plt.plot(xs, ys, 'k', c='blue')
+            plt.plot(xs, ys, 'k', c=color_pen, linewidth=linewidth)
 
 
         # plt.show()

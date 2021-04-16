@@ -3,6 +3,7 @@ import os, errno
 import sys
 import uuid
 
+
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 import random as rnd
@@ -21,7 +22,10 @@ from trdg.utils import load_dict, load_fonts
 from trdg.data_generator_handwriting import FakeTextDataGenerator
 
 from multiprocessing import Pool
-
+import numpy as np
+from trdg.handwritten_model.handwritten import HandwritingSynthesisNetwork
+from trdg.handwritten_model import params as pr
+import torch
 
 def margins(margin):
     margins = margin.split(",")
@@ -405,6 +409,19 @@ def main():
 
     # Handwriting model
 
+    vocab = np.load(pr.vocab_path)
+    print("Vocab: ", vocab)
+    char2idx = {x: i for i, x in enumerate(vocab)}
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    model = HandwritingSynthesisNetwork(
+        len(vocab),
+        pr.dec_hidden_size, pr.dec_n_layers,
+        pr.n_mixtures_attention, pr.n_mixtures_output,
+        device
+    )
+    model.load_state_dict(torch.load(pr.load_path, map_location=torch.device('cpu')))
+    model = model.to(device)
+
 
 
     colors_generator = FontColor("font_utils/colors_new.npy", gray_diff_threshold=70)
@@ -444,6 +461,9 @@ def main():
                 [args.image_dir] * string_count,
                 [prefix_name] * string_count,
                 [colors_generator] * string_count,
+                [model] * string_count,
+                [vocab] * string_count,
+                [char2idx] * string_count,
             ),
         ),
         total=args.count,

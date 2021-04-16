@@ -8,9 +8,7 @@ Image.MAX_IMAGE_PIXELS = None
 from trdg import computer_text_generator, background_generator, distorsion_generator
 import uuid
 from trdg.font_utils import color_convert
-import numpy as np
-from trdg.handwritten_model import params as pr
-import torch
+
 
 try:
     from trdg import handwritten_text_generator_v2
@@ -18,22 +16,9 @@ except ImportError as e:
     # print("Missing modules for handwritten text generation.")
     pass
 
-vocab = np.load(pr.vocab_path)
-print("Vocab: ", vocab)
-char2idx = {x: i for i, x in enumerate(vocab)}
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-model = HandwritingSynthesisNetwork(
-    len(vocab),
-    pr.dec_hidden_size, pr.dec_n_layers,
-    pr.n_mixtures_attention, pr.n_mixtures_output,
-    device
-)
-model.load_state_dict(torch.load(pr.load_path, map_location=torch.device('cpu')))
-model = model.to(device)
 
 class FakeTextDataGenerator(object):
-
 
     @classmethod
     def generate_from_tuple(cls, t):
@@ -72,7 +57,7 @@ class FakeTextDataGenerator(object):
         word_split,
         image_dir,
         prefix_name,
-        colors_generator,
+        colors_generator,model, vocab, char2idx,
     ):
 
         # try:
@@ -219,7 +204,7 @@ class FakeTextDataGenerator(object):
             if is_handwritten:
                 if orientation == 1:
                     raise ValueError("Vertical handwritten text is unavailable")
-                image, mask = handwritten_text_generator_v2.generate(model, vocab, device, char2idx, text, text_color)
+                image, mask = handwritten_text_generator_v2.generate(model, vocab, char2idx, text)
             else:
                 image, mask = computer_text_generator.generate(
                     text,
