@@ -21,7 +21,8 @@ from trdg.utils import load_dict, load_fonts
 # from trdg.data_generator import FakeTextDataGenerator
 from trdg.data_generator_handwriting import FakeTextDataGenerator
 
-from multiprocessing import Pool
+from torch.multiprocessing import Pool
+import torch
 import numpy as np
 from trdg.handwritten_model.handwritten import HandwritingSynthesisNetwork
 from trdg.handwritten_model import params as pr
@@ -490,4 +491,5 @@ def main():
 
 
 if __name__ == "__main__":
+    torch.multiprocessing.set_start_method('spawn')# good solution !!!!
     main()
