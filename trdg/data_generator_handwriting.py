@@ -108,8 +108,9 @@ class FakeTextDataGenerator(object):
                     distorsion_orientation = 0
 
                 # DISABLE DISTOR
-                distorsion_type = 0
-                distorsion_orientation = 0
+                if is_handwritten:
+                    distorsion_type = 0
+                    distorsion_orientation = 0
 
             else:
                 ### Simple random background ###
@@ -143,8 +144,9 @@ class FakeTextDataGenerator(object):
                     distorsion_type = 0
                     distorsion_orientation = 0
 
-                distorsion_type = 0
-                distorsion_orientation = 0
+                if is_handwritten:
+                    distorsion_type = 0
+                    distorsion_orientation = 0
 
                 '''BLUR'''
                 if rnd.random() < 0.1:   # 10% blur

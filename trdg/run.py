@@ -1,5 +1,6 @@
 import argparse
 import os, errno
+import re
 import sys
 import uuid
 
@@ -363,7 +364,6 @@ def main():
 
 
     # Creating synthetic sentences (or word)
-    strings = []
 
     if args.use_wikipedia:
         strings = create_strings_from_wikipedia(args.length, args.count, args.language)
@@ -409,6 +409,9 @@ def main():
 
 
     # Handwriting model
+    if args.handwritten:
+        strings = [re.sub(r'[^aAàÀảẢãÃáÁạẠăĂằẰẳẲẵẴắẮặẶâÂầẦẩẨẫẪấẤậẬbBcCdDđĐeEèÈẻẺẽẼéÉẹẸêÊềỀểỂễỄếẾệỆfFgGhHiIìÌỉỈĩĨíÍịỊjJkKlLmMnNoOòÒỏỎõÕóÓọỌôÔồỒổỔỗỖốỐộỘơƠờỜởỞỡỠớỚợỢpPqQrRsStTuUùÙủỦũŨúÚụỤưƯừỪửỬữỮứỨựỰvVwWxXyYỳỲỷỶỹỸýÝỵỴzZ0123456789]', '', string) for string in strings]
+        strings = [string for string in strings if len(string) > 0]
 
     vocab = np.load(pr.vocab_path)
     print("Vocab: ", vocab)
@@ -426,6 +429,7 @@ def main():
 
 
     colors_generator = FontColor("font_utils/colors_new.npy", gray_diff_threshold=70)
+
 
     string_count = len(strings)
     print(args)
