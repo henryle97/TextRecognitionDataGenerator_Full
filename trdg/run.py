@@ -336,6 +336,7 @@ def main():
             raise
 
     # Creating word list
+    print("is file dict: ", os.path.isfile(args.dict), args.dict)
     if args.dict:
         lang_dict = []
         if os.path.isfile(args.dict):

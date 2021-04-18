@@ -1,4 +1,5 @@
 /trdg/text_result/*
+!/trdg/text_result/*.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

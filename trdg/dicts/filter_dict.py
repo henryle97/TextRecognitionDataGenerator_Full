@@ -36,5 +36,5 @@ def remove_non_vietnamese(vi_file, en_file, outpath):
 
 if __name__ == '__main__':
     # filter("word_dict_all_order_eng_vi.txt", "word_dict_order.txt")
-    remove_non_vietnamese('vi_dictionary_hw.txt', 'words_eng.txt', 'vi_dictionary_hw.txt')
+    remove_non_vietnamese('vi_dictionary_hw.txt', 'words_eng.txt', 'vi_dictionary_hw_2.txt')
 
